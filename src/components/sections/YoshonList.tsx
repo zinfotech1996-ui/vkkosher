@@ -70,9 +70,9 @@ const YoshonList: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-1/4">Brand</TableHead>
-                  <TableHead className="w-1/2">Product Name</TableHead>
-                  <TableHead className="w-1/4">
+                  <TableHead className="w-1/4 font-bold">Brand</TableHead>
+                  <TableHead className="w-1/2 font-bold">Product Name</TableHead>
+                  <TableHead className="w-1/4 font-bold">
                     Yoshon
                     <div className="text-xs font-normal text-blue-600 mt-1">
                       *Made in Israel is always Yoshon
