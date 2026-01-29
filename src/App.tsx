@@ -1,6 +1,6 @@
 // In App.tsx - add useEffect to handle scrolling when coming from another page
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, HashRouter } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Hero from './components/sections/Hero';
 import Services from './components/sections/Services';
@@ -62,13 +62,13 @@ function HomePage() {
 
 function App() {
   return (
-    <Router>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/job-opportunities" element={<JobOpportunitiesPage />} />
         <Route path="/yoshon-list" element={<YoshonList />} />
       </Routes>
-    </Router>
+    </HashRouter>
   );
 }
 
