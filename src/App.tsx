@@ -12,6 +12,7 @@ import Footer from './components/layout/Footer';
 import JobOpportunitiesPage from './components/sections/JobOpportunitiesPage';
 import YoshonList from './components/sections/YoshonList';
 import GoogleAnalytics from './components/GoogleAnalytics';
+import YoshonListPage from './components/sections/YoshonListPage';
 
 function HomePage() {
   // Handle scrolling to section when coming from another page
@@ -66,7 +67,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/job-opportunities" element={<JobOpportunitiesPage />} />
-        <Route path="/yoshon-list" element={<YoshonList />} />
+        <Route path="/yoshon-list" element={<YoshonListPage />} />
       </Routes>
     </HashRouter>
   );
