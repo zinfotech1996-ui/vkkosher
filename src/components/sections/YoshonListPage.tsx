@@ -3,7 +3,7 @@ import PageLayout from '../layout/PageLayout';
 import YoshonList from './YoshonList';
 import SimpleHeader from '../layout/SimpleHeader';
 
-const YoshonListPage = () => {
+const YoshonListPage: React.FC = () => {
   return (
     <PageLayout>
       <SimpleHeader />

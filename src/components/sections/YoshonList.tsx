@@ -4,7 +4,7 @@ import { Input } from '../ui/input'; // This should work after creating the file
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'; // This should work after creating the file
 import yoshonProductsData from '../../data/yoshon-products.json';
 
-const YoshonList = () => {
+const YoshonList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const products = yoshonProductsData;
 
