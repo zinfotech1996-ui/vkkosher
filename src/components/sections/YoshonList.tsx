@@ -1,27 +1,75 @@
 import React, { useState, useMemo } from 'react';
-import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Input } from '../ui/input'; // This should work after creating the file
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'; // This should work after creating the file
 import yoshonProductsData from '../../data/yoshon-products.json';
 
+type SortConfig = {
+  key: string;
+  direction: 'asc' | 'desc' | null;
+};
+
 const YoshonList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: null });
   const itemsPerPage = 20;
   const products = yoshonProductsData;
 
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products;
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' | null = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    } else if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = null;
+    }
+    setSortConfig({ key, direction });
+  };
 
-    const query = searchQuery.toLowerCase();
-    return products.filter((product) => {
-      const brand = (product.Brand || '').toLowerCase();
-      const productName = (product['Product Name'] || '').toLowerCase();
-      const yoshon = (product.Yoshon || '').toLowerCase();
-      
-      return brand.includes(query) || productName.includes(query) || yoshon.includes(query);
-    });
-  }, [products, searchQuery]);
+  const getSortIcon = (key: string) => {
+    if (sortConfig.key !== key || sortConfig.direction === null) {
+      return <ArrowUpDown className="ml-2 h-4 w-4" />;
+    }
+    return sortConfig.direction === 'asc' ? (
+      <ArrowUp className="ml-2 h-4 w-4" />
+    ) : (
+      <ArrowDown className="ml-2 h-4 w-4" />
+    );
+  };
+
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    // Search filtering
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((product) => {
+        const brand = (product.Brand || '').toLowerCase();
+        const productName = (product['Product Name'] || '').toLowerCase();
+        const yoshon = (product.Yoshon || '').toLowerCase();
+        
+        return brand.includes(query) || productName.includes(query) || yoshon.includes(query);
+      });
+    }
+
+    // Sorting
+    if (sortConfig.key && sortConfig.direction) {
+      result.sort((a, b) => {
+        const aValue = (a[sortConfig.key as keyof typeof a] || '').toString().toLowerCase();
+        const bValue = (b[sortConfig.key as keyof typeof b] || '').toString().toLowerCase();
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return result;
+  }, [products, searchQuery, sortConfig]);
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   
@@ -30,10 +78,10 @@ const YoshonList: React.FC = () => {
     return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredProducts, currentPage]);
 
-  // Reset to first page when search query changes
+  // Reset to first page when search query or sort changes
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, sortConfig]);
 
   return (
     <section id="yoshon-list" className="py-20 bg-gray-100">
@@ -70,10 +118,33 @@ const YoshonList: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-1/4 font-bold">Brand</TableHead>
-                  <TableHead className="w-1/2 font-bold">Product Name</TableHead>
-                  <TableHead className="w-1/4 font-bold">
-                    Yoshon
+                  <TableHead className="w-16 font-bold">#</TableHead>
+                  <TableHead 
+                    className="w-1/4 font-bold cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => handleSort('Brand')}
+                  >
+                    <div className="flex items-center">
+                      Brand
+                      {getSortIcon('Brand')}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="w-1/2 font-bold cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => handleSort('Product Name')}
+                  >
+                    <div className="flex items-center">
+                      Product Name
+                      {getSortIcon('Product Name')}
+                    </div>
+                  </TableHead>
+                  <TableHead 
+                    className="w-1/4 font-bold cursor-pointer hover:bg-gray-50 transition-colors"
+                    onClick={() => handleSort('Yoshon')}
+                  >
+                    <div className="flex items-center">
+                      Yoshon
+                      {getSortIcon('Yoshon')}
+                    </div>
                     <div className="text-xs font-normal text-blue-600 mt-1">
                       *Made in Israel is always Yoshon
                     </div>
@@ -83,32 +154,36 @@ const YoshonList: React.FC = () => {
               <TableBody>
                 {paginatedProducts.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={4} className="text-center py-8 text-gray-500">
                       {searchQuery ? 'No products found matching your search.' : 'No products available.'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  paginatedProducts.map((product, index) => (
-                    <TableRow key={index} data-testid={`product-row-${index}`}>
-                      <TableCell className="font-medium">{product.Brand}</TableCell>
-                      <TableCell>{product['Product Name']}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          product.Yoshon?.includes('Certified') 
-                            ? 'bg-green-100 text-green-800'
-                            : product.Yoshon?.includes('N/A')
-                            ? 'bg-gray-100 text-gray-800'
-                            : product.Yoshon?.includes('When Marked')
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : product.Yoshon?.includes('Upon Review')
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {product.Yoshon}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  paginatedProducts.map((product, index) => {
+                    const globalIndex = (currentPage - 1) * itemsPerPage + index + 1;
+                    return (
+                      <TableRow key={index} data-testid={`product-row-${index}`}>
+                        <TableCell className="text-gray-500 font-mono text-xs">{globalIndex}</TableCell>
+                        <TableCell className="font-medium">{product.Brand}</TableCell>
+                        <TableCell>{product['Product Name']}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            product.Yoshon?.includes('Certified') 
+                              ? 'bg-green-100 text-green-800'
+                              : product.Yoshon?.includes('N/A')
+                              ? 'bg-gray-100 text-gray-800'
+                              : product.Yoshon?.includes('When Marked')
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : product.Yoshon?.includes('Upon Review')
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {product.Yoshon}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
